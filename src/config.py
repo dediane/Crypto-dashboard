@@ -1,0 +1,1 @@
+PLOTLY_TEMPLATE = 'plotly_dark'  # Plotly template

@@ -1,0 +1,88 @@
+body {
+    background-color: #1c1c1d;
+    font-family: 'Arial', sans-serif;
+}
+
+h1 {
+    color: #ffffff;
+    text-align: center;
+    padding: 20px;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.graph-container {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #111111;
+    border-radius: 8px;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.5);
+}
+
+.pair_container {
+    display: flex;
+}
+
+/* Pair selector styling */
+.pair-selector {
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+.pair-selector label {
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.pair-selector .Select-control {
+    background-color: #2e2e2e;
+    border: 1px solid #444;
+    color: #ffffff;
+}
+
+.pair-selector .Select-placeholder {
+    color: #ffffff !important;
+}
+
+.pair-selector .Select-menu-outer {
+    background-color: #2e2e2e;
+    border: 1px solid #444;
+    color: #ffffff;
+}
+
+.pair-selector .Select-option {
+    background-color: #2e2e2e;
+    color: #ffffff;
+}
+
+.pair-selector .Select-option.is-focused {
+    background-color: #444;
+    color:#ffffff !important;
+}
+
+.pair-selector .Select-option.is-selected {
+    background-color: #555;
+    color: #ffffff;
+}
+
+.pair-selector .Select--single .Select-control .Select-value .Select-value-label {
+    color: #ffffff;
+}
+
+.pair-selector .dash-dropdown .Select-control:focus {
+    border-color: #6c44db !important; /* Change this to your desired color */
+    box-shadow: 0 0 0 1px #926ceb !important; /* Change this to your desired color */
+}
+
+.pair-selector .dash-dropdown .Select-value-label {
+    color: #ffffff;
+}
+
+._dash-loading {
+    background-color: #121212;
+    color: #ffffff;
+}
