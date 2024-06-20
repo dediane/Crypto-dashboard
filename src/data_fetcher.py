@@ -70,5 +70,5 @@ def fetch_initial_data(pair):
     df_daily = fetch_btc_data_daily(pair)
     df_seconds = fetch_btc_data_seconds(pair)
     bids, asks = fetch_order_book(pair)
-    
+
     return df_daily, df_seconds, bids, asks

@@ -1,3 +1,28 @@
+# import os
+# import sys
+# sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+# from dash import Dash
+# import plotly.io as pio
+
+# import config
+# from layout import create_layout
+# from callbacks import register_callbacks
+
+# # Configure Plotly template
+# pio.templates.default = config.PLOTLY_TEMPLATE
+
+# # Initialize Dash app
+# app = Dash(__name__)
+
+# # Set app layout
+# app.layout = create_layout()
+
+# # Register callbacks
+# register_callbacks(app)
+
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
+
 from dash import Dash, dcc, html, Input, Output
 import dash_bootstrap_components as dbc
 import pandas as pd
@@ -10,6 +35,8 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from data_fetcher import fetch_btc_data_daily, fetch_btc_data_seconds, fetch_order_book
+from heatmap import get_timeframe_limits, fetch_ohlcv_with_pagination
+from whales import fetch_whale_movements
 from layout import create_layout
 from callbacks import register_callbacks
 import config
@@ -31,10 +58,12 @@ app.layout = create_layout()
      Output('market-depth-chart', 'figure'),
      Output('rsi-chart', 'figure'),
      Output('macd-chart', 'figure'),
+     Output('volume-heatmap', 'figure'),
     ],
-    [Input('interval-component', 'n_intervals'), Input('pair-selector', 'value')]
+    [Input('interval-component', 'n_intervals'), Input('pair-selector', 'value'), Input('tabs', 'value')]
 )
-def update_charts(n, pair):
+
+def update_charts(n, pair, selected_period):
     df = fetch_btc_data_daily(pair)
     dfs = fetch_btc_data_seconds(pair)
     bids, asks = fetch_order_book(pair)
@@ -89,7 +118,36 @@ def update_charts(n, pair):
     macd_chart.add_trace(go.Bar(x=df['timestamp'], y=df['MACD_Hist'], name='MACD Histogram'))
     macd_chart.update_layout(title='Moving Average Convergence Divergence (MACD)')
     
-    return price_chart, volume_bubble_chart, candlestick_chart_daily, candlestick_chart_seconds, volume_bubble_chart_seconds, market_depth_chart, rsi_chart, macd_chart
+    timeframe, since = get_timeframe_limits(selected_period)
+    ohlcv = fetch_ohlcv_with_pagination(pair, timeframe, since, 1000, selected_period)
+
+    df_heatmap = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df_heatmap['timestamp'] = pd.to_datetime(df_heatmap['timestamp'], unit='ms')
+    df_heatmap['time'] = df_heatmap['timestamp'].dt.strftime('%H:%M')
+    df_heatmap['day'] = df_heatmap['timestamp'].dt.date
+
+    heatmap_data = df_heatmap.pivot_table(values='volume', index='day', columns='time', fill_value=0)
+
+    volume_heatmap = go.Figure(data=[go.Heatmap(z=heatmap_data.values, x=heatmap_data.columns, y=heatmap_data.index, colorscale='Viridis')])
+    volume_heatmap.update_layout(
+        title=f'Trading Volume Heatmap for {pair} ({selected_period})',
+        xaxis={'title': 'Time of Day'},
+        yaxis={'title': 'Date'},
+        annotations=[
+            dict(
+                xref='paper',
+                yref='paper',
+                x=1.05,
+                y=1.1,
+                xanchor='center',
+                yanchor='top',
+                text=f'Volume in {pair.split("/")[0]}',
+                showarrow=False
+            )
+        ]
+    )
+    
+    return price_chart, volume_bubble_chart, candlestick_chart_daily, candlestick_chart_seconds, volume_bubble_chart_seconds, market_depth_chart, rsi_chart, macd_chart, volume_heatmap
 
 if __name__ == '__main__':
     app.run_server(debug=True)
